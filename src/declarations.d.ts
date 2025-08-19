@@ -8,3 +8,12 @@ declare module "*.css";
 //   export default classes;
 // }
 
+
+interface ImportMetaEnv {
+	readonly VITE_TMDB_TOKEN: string;
+}
+
+interface ImportMeta {
+	readonly env: ImportMetaEnv;
+}
+
