@@ -1,10 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import SearchBar from '../SearchBar/SearchBar';
 import type { Movie } from '../../types/movie';
 import { getMovies } from '../../services/movieService';
-import { Toaster } from 'react-hot-toast';
+import type { MoviesResponse } from '../../services/movieService';
+import { Toaster, toast } from 'react-hot-toast';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import MovieModal from '../MovieModal/MovieModal';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
@@ -23,10 +24,11 @@ function App() {
     isLoading,
     isError,
     isFetching,
-  } = useQuery<import('../../types/movie').MoviesResponse, Error>({
+  } = useQuery<MoviesResponse, Error>({
     queryKey: ['movies', query, page],
     queryFn: () => getMovies(query, page),
     enabled: !!query,
+    placeholderData: (prev) => prev,
   });
 
   const handleSubmit = (value: string) => {
@@ -45,6 +47,12 @@ function App() {
   const movies = data?.results || [];
   const totalPages = data?.total_pages || 0;
   const isEmpty = query && !isLoading && movies.length === 0;
+
+  useEffect(() => {
+    if (isEmpty) {
+      toast('No movies found for your request.');
+    }
+  }, [isEmpty]);
 
   return (
     <>
@@ -66,7 +74,7 @@ function App() {
       {movies.length > 0 && (
         <MovieGrid onSelect={handleMovieClick} movies={movies} />
       )}
-      {isEmpty && <p>No movies found for your request.</p>}
+  {/* isEmpty handled by toast */}
       {isError && <ErrorMessage />}
       {selectedMovie && (
         <MovieModal onClose={closeModal} movie={selectedMovie} />
